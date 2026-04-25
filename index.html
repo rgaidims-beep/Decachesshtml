@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Decachess — 10×10 Chess</title>
+  <link rel="stylesheet" href="decachess.css"/>
+</head>
+<body>
+<div id="app">
+
+  <!-- ════ HEADER ════ -->
+  <header>
+    <div class="header-inner">
+      <h1>DECA<span>CHESS</span></h1>
+      <p class="subtitle">10×10 Strategic Chess Variant</p>
+    </div>
+    <div class="controls">
+      <button id="btn-new-game">New Game</button>
+      <button id="btn-flip">Flip Board</button>
+      <button id="btn-theme">🎨 Theme</button>
+      <button id="btn-rules">Rules</button>
+      <span id="ai-badge" style="display:none"></span>
+      <span id="mp-badge" style="display:none"></span>
+    </div>
+  </header>
+
+  <!-- ════ SETUP PANEL ════ -->
+  <div class="ai-panel">
+    <div class="ai-panel-inner">
+      <div class="mode-row">
+        <span class="ai-label">Mode:</span>
+        <button class="mode-btn active" data-mode="2p">👥 Local 2P</button>
+        <button class="mode-btn" data-mode="ai">🤖 vs AI</button>
+        <button class="mode-btn" data-mode="mp">🌐 Online</button>
+      </div>
+      <div class="mode-row" id="ai-level-row" style="display:none">
+        <span class="ai-label">Difficulty:</span>
+        <button class="level-btn" data-level="1">😴 Easy</button>
+        <button class="level-btn" data-level="2">🙂 Medium</button>
+        <button class="level-btn active" data-level="3">😤 Hard</button>
+        <button class="level-btn" data-level="4">🔥 Super Hard</button>
+        <button class="level-btn" data-level="5">💀 Impossible</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MAIN ════ -->
+  <main>
+    <aside class="panel panel-left">
+      <div class="captured-section">
+        <h3>Captured by White</h3>
+        <div id="captured-white" class="captured-pieces"></div>
+      </div>
+      <div class="move-log-section">
+        <h3>Move Log</h3>
+        <div id="move-log" class="move-log"></div>
+      </div>
+    </aside>
+
+    <div class="board-wrapper">
+      <div id="status-bar" class="status-bar">White's Turn</div>
+      <!-- Online game info bar -->
+      <div id="mp-info-bar" class="mp-info-bar" style="display:none">
+        <span id="mp-room-display"></span>
+        <span id="mp-conn-status"></span>
+      </div>
+      <div class="board-container">
+        <div id="board" class="board"></div>
+      </div>
+    </div>
+
+    <aside class="panel panel-right">
+      <div class="captured-section">
+        <h3>Captured by Black</h3>
+        <div id="captured-black" class="captured-pieces"></div>
+      </div>
+      <div class="piece-legend">
+        <h3>Piece Guide</h3>
+        <div class="legend-list" id="legend"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ════ MULTIPLAYER LOBBY MODAL ════ -->
+  <div id="mp-modal" class="modal hidden">
+    <div class="modal-box mp-box">
+      <button class="modal-close" onclick="document.getElementById('mp-modal').classList.add('hidden')">✕</button>
+      <h2>🌐 Online <span>Multiplayer</span></h2>
+
+      <div id="mp-lobby">
+        <p class="mp-desc">Play against a friend anywhere in the world. No account needed — just share a room code.</p>
+
+        <div class="mp-section">
+          <h3>Create a Room</h3>
+          <p>You'll play as <strong style="color:var(--gold)">White</strong>. Share the code with your opponent.</p>
+          <button class="btn primary" id="btn-create-room">Generate Room Code</button>
+          <div id="room-created" style="display:none">
+            <div class="room-code-display" id="room-code-text">——————</div>
+            <button class="btn" onclick="copyRoomCode()">📋 Copy Code</button>
+            <div id="waiting-msg" class="waiting-msg">⏳ Waiting for opponent to join…</div>
+          </div>
+        </div>
+
+        <div class="mp-divider">— or —</div>
+
+        <div class="mp-section">
+          <h3>Join a Room</h3>
+          <p>You'll play as <strong style="color:var(--muted)">Black</strong>. Enter the code your opponent shared.</p>
+          <div class="mp-join-row">
+            <input type="text" id="join-code-input" placeholder="Enter room code…" maxlength="6" style="text-transform:uppercase;letter-spacing:.2em;font-size:1.1rem;text-align:center"/>
+            <button class="btn primary" id="btn-join-room">Join</button>
+          </div>
+          <div id="join-status" class="join-status"></div>
+        </div>
+      </div>
+
+      <div id="mp-connected" style="display:none">
+        <div class="mp-connected-box">
+          <div class="mp-conn-icon">🟢</div>
+          <h3>Connected!</h3>
+          <p id="mp-you-are"></p>
+          <button class="btn primary" id="btn-start-mp">Start Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ THEME MODAL ════ -->
+  <div id="theme-modal" class="modal hidden">
+    <div class="modal-box theme-box">
+      <button class="modal-close" onclick="document.getElementById('theme-modal').classList.add('hidden')">✕</button>
+      <h2>🎨 <span>Customize</span></h2>
+
+      <div class="theme-section">
+        <h3>Website Theme</h3>
+        <div class="theme-grid" id="site-theme-grid"></div>
+      </div>
+
+      <div class="theme-section">
+        <h3>Board Skin</h3>
+        <div class="theme-grid" id="board-skin-grid"></div>
+      </div>
+
+      <div class="theme-section">
+        <h3>Piece Skin</h3>
+        <div class="theme-grid" id="piece-skin-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PROMOTION MODAL ════ -->
+  <div id="promotion-modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Promote Pawn</h2>
+      <p>Choose a piece:</p>
+      <div id="promotion-choices" class="promotion-choices"></div>
+    </div>
+  </div>
+
+  <!-- ════ RULES MODAL ════ -->
+  <div id="rules-modal" class="modal hidden">
+    <div class="modal-box rules-box">
+      <button class="modal-close" id="close-rules">✕</button>
+      <h2>Decachess Rules</h2>
+      <div class="rules-content">
+        <h3>Board</h3>
+        <p>10×10 board, files a–j, ranks 1–10.</p>
+        <h3>Pieces &amp; Movement</h3>
+        <ul>
+          <li><strong>King (K)</strong> — 1 square any direction.</li>
+          <li><strong>Queen (Q)</strong> — Any number of squares any direction.</li>
+          <li><strong>Rook (R)</strong> — Horizontal &amp; vertical, any number.</li>
+          <li><strong>Knight (N)</strong> — Standard L-shape jump.</li>
+          <li><strong>Pawn (P)</strong> — 1 square forward; first move up to 3 squares (once per pawn).</li>
+          <li><strong>Wizard (W)</strong> — Bishop moves OR Knight moves.</li>
+          <li><strong>Dragon (D)</strong> — Rook-style, up to 4 squares. No jumping.</li>
+          <li><strong>Champion (C)</strong> — 1–2 squares any direction (no jumping).</li>
+          <li><strong>Archer (A)</strong> — Moves 1 square to empty squares only. Attacks without moving, straight 1–2 squares.</li>
+          <li><strong>Portal (O)</strong> — Moves 1 square; or swaps with any friendly piece (not King) within 3 squares.</li>
+        </ul>
+        <h3>Pawn Promotion</h3>
+        <p>Promote to Queen, Wizard, Dragon, Champion, or Archer.</p>
+        <h3>Castling</h3>
+        <p>King castles with Rook or Dragon (standard rules apply).</p>
+        <h3>Online Multiplayer</h3>
+        <p>Click <strong>🌐 Online</strong> mode, create or join a room with a 6-digit code. Peer-to-peer — no server needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ GAME OVER MODAL ════ -->
+  <div id="game-over-modal" class="modal hidden">
+    <div class="modal-box game-over-box">
+      <h2 id="game-over-title">Checkmate!</h2>
+      <p id="game-over-msg"></p>
+      <button id="btn-play-again">Play Again</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- PeerJS for WebRTC multiplayer -->
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="decachess.js"></script>
+</body>
+</html>
